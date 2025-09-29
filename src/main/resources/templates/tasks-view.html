@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Tasks - Productivity Pro</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+</head>
+<body class="home-body">
+    <header class="header">
+        <div class="header-content">
+            <h1>All Tasks</h1>
+            <div class="header-actions">
+                <span class="welcome-text">Welcome, <span th:text="${session.user.username}">User</span>!</span>
+                <a th:href="@{/}" class="view-all-btn">Back to Home</a>
+                <a th:href="@{/auth/logout}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content-full">
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h2>All Your Tasks</h2>
+                <div class="tasks-stats">
+    <span>Total: <strong th:text="${#lists.size(tasks)}">0</strong></span>
+    <span>Completed: 
+        <strong th:text="${#lists.size(tasks.?[completed])}">0</strong>
+    </span>
+    <span>Pending: 
+        <strong th:text="${#lists.size(tasks.?[!completed])}">0</strong>
+    </span>
+</div>
+                
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success">
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-error">
+                <span th:text="${error}"></span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(tasks)}" class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>No tasks yet</h3>
+                <p>Create your first task to get started!</p>
+                <a th:href="@{/}" class="save-btn">Create Task</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(tasks)}" class="tasks-grid-full">
+                <div th:each="task : ${tasks}" th:class="${task.completed} ? 'task-card completed' : 'task-card'">
+                    <div class="task-header">
+                        <h4 th:class="${task.completed} ? 'strikethrough' : ''">
+    <span th:text="${task.title}"></span>
+    <span th:if="${task.reminderTime}" title="Reminder Set">⏰</span>
+</h4>
+                        
+                        <div class="task-actions">
+                            <form th:action="@{/tasks/{id}/complete(id=${task.id})}" method="post" style="display: inline;">
+                                <button type="submit" th:class="${task.completed} ? 'complete-btn completed' : 'complete-btn'">
+                                    <span th:text="${task.completed} ? '✓' : '○'"></span>
+                                </button>
+                            </form>
+                            <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="edit-btn">Edit</a>
+                            <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this task?')">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    <p th:class="${task.completed} ? 'strikethrough' : ''" th:text="${task.description ?: 'No description'}"></p>
+                    <div class="task-meta">
+                        <span th:if="${task.dueDate}">
+                            <strong>Due:</strong> <span th:text="${#temporals.format(task.dueDate, 'MMM dd, yyyy HH:mm')}"></span>
+                        </span>
+                        <span th:if="${task.reminderTime}" style="color:#F59E0B;">
+                            <strong>Reminder:</strong> <span th:text="${#temporals.format(task.reminderTime, 'MMM dd, yyyy HH:mm')}"></span>
+                        </span>
+                        <span>
+                            <strong>Created:</strong> <span th:text="${#temporals.format(task.createdAt, 'MMM dd, yyyy')}"></span>
+                        </span>
+                        <span th:class="${task.completed} ? 'status-completed' : 'status-pending'">
+                            <strong>Status:</strong> <span th:text="${task.completed} ? 'Completed' : 'Pending'"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/calendar.js}"></script>
+    <script th:src="@{/js/reminder.js}"></script>
+</body>
+</html>

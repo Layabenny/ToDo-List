@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Pro</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+</head>
+<body class="home-body">
+    <header class="header">
+        <div class="header-content">
+            <h1>My ToDo-List</h1>
+            <div class="header-actions">
+                <span class="welcome-text">Welcome, <span th:text="${session.user.username}">User</span>!</span>
+                <a th:href="@{/tasks}" class="view-all-btn">View All Tasks</a>
+                <a th:href="@{/auth/logout}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Task Form -->
+            <div class="task-form-section">
+                <h3>Add New Task</h3>
+                <form th:action="@{/tasks}" method="post" th:object="${newTask}" class="task-form">
+                    <input type="text" th:field="*{title}" placeholder="Task Title" required>
+                    <textarea th:field="*{description}" placeholder="Description"></textarea>
+                    <input type="datetime-local" th:field="*{dueDate}">
+                    <input type="datetime-local" th:field="*{reminderTime}" placeholder="Reminder Time">
+                    <button type="submit" class="save-btn">Add Task</button>
+                </form>
+            </div>
+  </div>
+
+        <!-- Tasks Section -->
+        <div class="tasks-section">
+            <h2>Today's Tasks</h2>
+            
+            <div th:if="${success}" class="alert alert-success">
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-error">
+                <span th:text="${error}"></span>
+            </div>
+
+            <div class="tasks-grid">
+                <div th:each="task : ${tasks}" th:class="${task.completed} ? 'task-card completed' : 'task-card'">
+                    <div class="task-header">
+                        <h4 th:class="${task.completed} ? 'strikethrough' : ''" th:text="${task.title}"></h4>
+                        <div class="task-actions">
+                            <form th:action="@{/tasks/{id}/complete(id=${task.id})}" method="post" style="display: inline;">
+                                <button type="submit" th:class="${task.completed} ? 'complete-btn completed' : 'complete-btn'">
+                                    <span th:text="${task.completed} ? '✓' : '○'"></span>
+                                </button>
+                            </form>
+                            <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="edit-btn">Edit</a>
+                            <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure?')">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    <p th:class="${task.completed} ? 'strikethrough' : ''" th:text="${task.description}"></p>
+                    <div class="task-meta">
+                        <span th:if="${task.dueDate}">
+                            Due: <span th:text="${#temporals.format(task.dueDate, 'MMM dd, yyyy HH:mm')}"></span>
+                        </span>
+                        <span th:if="${task.reminderTime}">
+                            Reminder: <span th:text="${#temporals.format(task.reminderTime, 'MMM dd, yyyy HH:mm')}"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script th:src="@{/js/calendar.js}"></script>
+</body>
+</html>
